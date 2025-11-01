@@ -26,6 +26,8 @@ public class User implements UserDetails {
     private String password;
     @Column(nullable = false, unique = true)
     private String username;
+    private String verifyToken;
+    private boolean isVerified;
 
     @ManyToMany(mappedBy = "users")
     private List<Book> books;
