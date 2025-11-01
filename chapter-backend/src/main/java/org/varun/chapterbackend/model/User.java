@@ -26,7 +26,7 @@ public class User implements UserDetails {
     private String password;
     @Column(nullable = false, unique = true)
     private String username;
-    private String verifyToken;
+    private String verificationCode;
     private boolean isVerified;
 
     @ManyToMany(mappedBy = "users")
