@@ -6,12 +6,12 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.varun.chapterbackend.service.MyUserDetailsService;
+import org.varun.chapterbackend.service.UserService;
 
 @Configuration
 @AllArgsConstructor
 public class ApplicationConfig {
-    private MyUserDetailsService userDetailsService;
+    private UserService userDetailsService;
     private BCryptPasswordEncoder encoder;
 
     @Bean
