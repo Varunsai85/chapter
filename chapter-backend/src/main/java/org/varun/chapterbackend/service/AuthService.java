@@ -18,52 +18,43 @@ import org.varun.chapterbackend.repository.UserRepository;
 @Service
 @AllArgsConstructor
 public class AuthService {
-    private UserRepository repo;
+    private UserRepository userRepo;
     private BCryptPasswordEncoder encoder;
-    private JwtService jwtService;
     private AuthenticationManager authenticationManager;
+    private JwtService jwtService;
 
     public ResponseEntity<?> signUp(SignUpDto userDto) {
-        User existingUser=repo.findUserByEmail(userDto.email());
-        if(existingUser!=null){
-            if(existingUser.isVerified()){
-                return new ResponseEntity<>(new ApiResponse<>("User Already exists"),HttpStatus.BAD_GATEWAY);
-            }else{
-                existingUser.setVerificationCode(jwtService.generateToken(existingUser.getEmail()));
-                repo.save(existingUser);
-                //ToDo
-                // Send Email
-                return new ResponseEntity<>(new ApiResponse<>("User Not verified verification code resent"),HttpStatus.FORBIDDEN);
+        User existingUser = userRepo.findUserByEmail(userDto.email());
+        if (existingUser != null) {
+            if (existingUser.isVerified()) {
+                return new ResponseEntity<>(new ApiResponse<>("User already exists"), HttpStatus.BAD_GATEWAY);
             }
+            return new ResponseEntity<>(new ApiResponse<>("User not verified, Please verify"), HttpStatus.FORBIDDEN);
         }
-        User user = new User();
-        user.setEmail(userDto.email());
-        user.setPassword(encoder.encode(userDto.password()));
-        user.setUsername(userDto.username());
-        user.setVerificationCode(jwtService.generateToken(userDto.email()));
-        user.setVerified(false);
-        repo.save(user);
-        return new ResponseEntity<>(new ApiResponse<>("User Created Successfully. Please verify your email"),HttpStatus.CREATED);
+        User newUser = new User();
+        newUser.setEmail(userDto.email());
+        newUser.setUsername(userDto.username());
+        newUser.setPassword(encoder.encode(userDto.password()));
+        newUser.setVerificationCode("Random");
+        newUser.setVerified(false);
+        userRepo.save(newUser);
+        return new ResponseEntity<>(new ApiResponse<>("User created successfully, Please verify"), HttpStatus.CREATED);
     }
 
     public ResponseEntity<?> signIn(SignInDto userDto) {
-        try{
-            authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(userDto.login(),userDto.password()));
+        try {
+            authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(userDto.subject(), userDto.password()));
+            User user = userRepo.findUserByUsername(userDto.subject());
+            if (user == null) user = userRepo.findUserByEmail(userDto.subject());
 
-            User user=repo.findUserByEmail(userDto.login());
-            if(user==null){
-                user=repo.findUserByUsername(userDto.login());
-            }
-
-            return new ResponseEntity<>(new ApiResponse<>("Login Successful",jwtService.generateToken(user.getEmail())),HttpStatus.OK);
-        }catch (DisabledException e){
-            return new ResponseEntity<>(new ApiResponse<>("User not verified"),HttpStatus.FORBIDDEN);
-        }
-        catch (BadCredentialsException e){
-            return new ResponseEntity<>(new ApiResponse<>("Invalid credentials"),HttpStatus.UNAUTHORIZED);
-        }
-        catch (Exception e){
-            return new ResponseEntity<>(new ApiResponse<>("Something went wrong"),HttpStatus.INTERNAL_SERVER_ERROR);
+            final String jwtToken = jwtService.generateToken(user.getUsername());
+            return new ResponseEntity<>(new ApiResponse<>("Login Successful", jwtToken), HttpStatus.OK);
+        } catch (DisabledException e) {
+            return new ResponseEntity<>(new ApiResponse<>("User not verified"), HttpStatus.FORBIDDEN);
+        } catch (BadCredentialsException e) {
+            return new ResponseEntity<>(new ApiResponse<>("Invalid Credentials"), HttpStatus.UNAUTHORIZED);
+        } catch (Exception e) {
+            return new ResponseEntity<>(new ApiResponse<>("Something went wrong"), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 }

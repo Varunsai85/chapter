@@ -1,4 +1,4 @@
 package org.varun.chapterbackend.model.dto;
 
-public record SignInDto(String login, String password) {
+public record SignInDto(String subject, String password) {
 }
