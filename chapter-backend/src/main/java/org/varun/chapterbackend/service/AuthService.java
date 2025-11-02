@@ -7,7 +7,6 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.varun.chapterbackend.model.User;
@@ -43,6 +42,7 @@ public class AuthService {
         user.setUsername(userDto.username());
         user.setVerificationCode(jwtService.generateToken(userDto.email()));
         user.setVerified(false);
+        repo.save(user);
         return new ResponseEntity<>(new ApiResponse<>("User Created Successfully. Please verify your email"),HttpStatus.CREATED);
     }
 
