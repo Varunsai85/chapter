@@ -27,13 +27,13 @@ public class AuthService {
         User existingUser=repo.findUserByEmail(userDto.email());
         if(existingUser!=null){
             if(existingUser.isVerified()){
-                return new ResponseEntity<>(new ApiResponse<>("User Already exists and Verified"),HttpStatus.BAD_GATEWAY);
+                return new ResponseEntity<>(new ApiResponse<>("User Already exists"),HttpStatus.BAD_GATEWAY);
             }else{
                 existingUser.setVerificationCode(jwtService.generateToken(existingUser.getEmail()));
                 repo.save(existingUser);
                 //ToDo
                 // Send Email
-                return new ResponseEntity<>(new ApiResponse<>("User Not Verfied verification code resent"),HttpStatus.OK);
+                return new ResponseEntity<>(new ApiResponse<>("User Not verified verification code resent"),HttpStatus.FORBIDDEN);
             }
         }
         User user = new User();
@@ -55,7 +55,7 @@ public class AuthService {
                 user=repo.findUserByUsername(userDto.login());
             }
 
-            return new ResponseEntity<>(new ApiResponse<>("Login Succesful",jwtService.generateToken(user.getEmail())),HttpStatus.OK);
+            return new ResponseEntity<>(new ApiResponse<>("Login Successful",jwtService.generateToken(user.getEmail())),HttpStatus.OK);
         }catch (DisabledException e){
             return new ResponseEntity<>(new ApiResponse<>("User not verified"),HttpStatus.FORBIDDEN);
         }
