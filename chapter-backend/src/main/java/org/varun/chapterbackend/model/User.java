@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
@@ -26,7 +27,10 @@ public class User implements UserDetails {
     private String password;
     @Column(nullable = false, unique = true)
     private String username;
+    @Column(name = "verification_code")
     private String verificationCode;
+    @Column(name = "verification_expiration")
+    private LocalDateTime verificationCodeExpiresAt;
     private boolean isVerified;
 
     @ManyToMany(mappedBy = "users")
