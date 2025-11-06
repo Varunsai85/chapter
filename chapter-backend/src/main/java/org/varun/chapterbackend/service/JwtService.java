@@ -25,50 +25,50 @@ public class JwtService {
 
     private final String secret;
 
-    public JwtService(){
-        this.secret=generateSecret();
+    public JwtService() {
+        this.secret = generateSecret();
     }
 
-    private String generateSecret(){
-        try{
-            KeyGenerator keyGen=KeyGenerator.getInstance("HmacSHA256");
-            SecretKey secretKey=keyGen.generateKey();
+    private String generateSecret() {
+        try {
+            KeyGenerator keyGen = KeyGenerator.getInstance("HmacSHA256");
+            SecretKey secretKey = keyGen.generateKey();
             return Base64.getEncoder().encodeToString(secretKey.getEncoded());
-        }catch (NoSuchAlgorithmException e){
-            throw new RuntimeException("Error while generating secret: ",e);
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException("Error while generating secret: ", e);
         }
     }
 
-    public String generateToken(String subject){
+    public String generateToken(String subject) {
         return Jwts.builder()
                 .setClaims(new HashMap<>())
                 .setSubject(subject)
                 .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis()+expiration))
+                .setExpiration(new Date(System.currentTimeMillis() + expiration))
                 .signWith(getKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
 
-    public Key getKey(){
-        byte[] keyBytes= Decoders.BASE64.decode(secret);
+    public Key getKey() {
+        byte[] keyBytes = Decoders.BASE64.decode(secret);
         return Keys.hmacShaKeyFor(keyBytes);
     }
 
     public boolean validateToken(String jwtToken, UserDetails userDetails) {
-        String username=extractUsername(jwtToken);
+        String username = extractUsername(jwtToken);
         return (username.equals(userDetails.getUsername()) && !isTokenExpired(jwtToken));
     }
 
     private boolean isTokenExpired(String jwtToken) {
-        return extractClaim(jwtToken,Claims::getExpiration).before(new Date());
+        return extractClaim(jwtToken, Claims::getExpiration).before(new Date());
     }
 
     public String extractUsername(String jwtToken) {
-        return extractClaim(jwtToken,Claims::getSubject);
+        return extractClaim(jwtToken, Claims::getSubject);
     }
 
-    public <T> T extractClaim(String token, Function<Claims,T> claimResolver){
-        Claims claims=extractAllClaims(token);
+    public <T> T extractClaim(String token, Function<Claims, T> claimResolver) {
+        Claims claims = extractAllClaims(token);
         return claimResolver.apply(claims);
     }
 

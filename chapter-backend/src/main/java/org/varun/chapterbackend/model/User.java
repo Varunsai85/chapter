@@ -42,7 +42,7 @@ public class User implements UserDetails {
     }
 
     @Override
-    public boolean isEnabled(){
+    public boolean isEnabled() {
         return this.isVerified;
     }
 }

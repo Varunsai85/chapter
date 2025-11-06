@@ -21,11 +21,11 @@ public class UserService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String login) throws UsernameNotFoundException {
-        User user=repo.findUserByUsername(login);
-        if(user==null){
-            user=repo.findUserByEmail(login);
+        User user = repo.findUserByUsername(login);
+        if (user == null) {
+            user = repo.findUserByEmail(login);
         }
-        if(user==null){
+        if (user == null) {
             throw new UsernameNotFoundException("User Not Found 404");
         }
 

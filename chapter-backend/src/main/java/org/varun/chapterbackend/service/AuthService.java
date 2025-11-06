@@ -67,29 +67,29 @@ public class AuthService {
         }
     }
 
-    public ResponseEntity<?> verifyUser(VerifyUserDto input){
-        User user=userRepo.findUserByEmail(input.email());
-        if(user==null){
-            return new ResponseEntity<>(new ApiResponse<>("User not Found"),HttpStatus.NOT_FOUND);
+    public ResponseEntity<?> verifyUser(VerifyUserDto input) {
+        User user = userRepo.findUserByEmail(input.email());
+        if (user == null) {
+            return new ResponseEntity<>(new ApiResponse<>("User not Found"), HttpStatus.NOT_FOUND);
         }
-        if(user.getVerificationCodeExpiresAt().isBefore(LocalDateTime.now())){
-            return new ResponseEntity<>(new ApiResponse<>("Verification code expired"),HttpStatus.BAD_REQUEST);
+        if (user.getVerificationCodeExpiresAt().isBefore(LocalDateTime.now())) {
+            return new ResponseEntity<>(new ApiResponse<>("Verification code expired"), HttpStatus.BAD_REQUEST);
         }
-        if(user.getVerificationCode().equals(input.verificationCode())){
+        if (user.getVerificationCode().equals(input.verificationCode())) {
             user.setVerified(true);
             user.setVerificationCode(null);
             user.setVerificationCodeExpiresAt(null);
             userRepo.save(user);
-            return new ResponseEntity<>(new ApiResponse<>("Account verified Successfully"),HttpStatus.OK);
+            return new ResponseEntity<>(new ApiResponse<>("Account verified Successfully"), HttpStatus.OK);
         } else {
-            return new ResponseEntity<>(new ApiResponse<>("Invalid Verification Code"),HttpStatus.UNAUTHORIZED);
+            return new ResponseEntity<>(new ApiResponse<>("Invalid Verification Code"), HttpStatus.UNAUTHORIZED);
         }
     }
 
-    private void sendVerificationEmail(User user){
-        String subject="Account Verification";
-        String verificationCode="VERIFICATION CODE"+user.getVerificationCode();
-        String htmlMessage="<html>"
+    private void sendVerificationEmail(User user) {
+        String subject = "Account Verification";
+        String verificationCode = "VERIFICATION CODE" + user.getVerificationCode();
+        String htmlMessage = "<html>"
                 + "<body style=\"font-family: Arial, sans-serif;\">"
                 + "<div style=\"background-color: #f5f5f5; padding: 20px;\">"
                 + "<h2 style=\"color: #333;\">Welcome to our app!</h2>"
@@ -101,16 +101,16 @@ public class AuthService {
                 + "</div>"
                 + "</body>"
                 + "</html>";
-        try{
-            emailService.sendEmail(user.getEmail(),subject,htmlMessage);
-        }catch (MessagingException e){
+        try {
+            emailService.sendEmail(user.getEmail(), subject, htmlMessage);
+        } catch (MessagingException e) {
             e.printStackTrace();
         }
     }
 
-    private String generateRandomCode(){
-        Random random=new Random();
-        int code=random.nextInt(900000)+100000;
+    private String generateRandomCode() {
+        Random random = new Random();
+        int code = random.nextInt(900000) + 100000;
         return String.valueOf(code);
     }
 }
