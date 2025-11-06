@@ -6,8 +6,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.varun.chapterbackend.model.dto.ApiResponse;
 import org.varun.chapterbackend.model.dto.SignInDto;
 import org.varun.chapterbackend.model.dto.SignUpDto;
+import org.varun.chapterbackend.model.dto.VerifyUserDto;
 import org.varun.chapterbackend.service.AuthService;
 
 @RestController
@@ -24,5 +26,10 @@ public class AuthController {
     @PostMapping("signin")
     public ResponseEntity<?> signIn(@RequestBody SignInDto userDto){
         return service.signIn(userDto);
+    }
+
+    @PostMapping("verify")
+    public ResponseEntity<?> verifyUser(@RequestBody VerifyUserDto verifyUserDto){
+        return service.verifyUser(verifyUserDto);
     }
 }
