@@ -24,12 +24,12 @@ public class AuthController {
     }
 
     @PostMapping("signin")
-    public ResponseEntity<?> signIn(@RequestBody SignInDto userDto){
+    public ResponseEntity<?> signIn(@RequestBody SignInDto userDto) {
         return service.signIn(userDto);
     }
 
     @PostMapping("verify")
-    public ResponseEntity<?> verifyUser(@RequestBody VerifyUserDto verifyUserDto){
+    public ResponseEntity<?> verifyUser(@RequestBody VerifyUserDto verifyUserDto) {
         return service.verifyUser(verifyUserDto);
     }
 }
