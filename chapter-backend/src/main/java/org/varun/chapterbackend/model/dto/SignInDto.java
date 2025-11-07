@@ -1,4 +1,11 @@
 package org.varun.chapterbackend.model.dto;
 
-public record SignInDto(String subject, String password) {
+import jakarta.validation.constraints.NotNull;
+
+public record SignInDto(
+        @NotNull(message = "Username or password is required")
+        String login,
+        @NotNull(message = "Password is required")
+        String password
+) {
 }

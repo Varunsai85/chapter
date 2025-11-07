@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
 public class EmailService {
     private JavaMailSender emailSender;
 
-    public void sendEmail(String to, String subject, String text) throws MessagingException {
+    public void sendVerificationEmail(String to, String subject, String text) throws MessagingException {
         MimeMessage message = emailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(message, true);
 

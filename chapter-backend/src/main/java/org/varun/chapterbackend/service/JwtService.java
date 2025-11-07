@@ -8,6 +8,7 @@ import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
+import org.varun.chapterbackend.model.User;
 
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
@@ -16,6 +17,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.function.Function;
 
 @Service
@@ -29,45 +31,43 @@ public class JwtService {
         this.secret = generateSecret();
     }
 
-    private String generateSecret() {
-        try {
-            KeyGenerator keyGen = KeyGenerator.getInstance("HmacSHA256");
-            SecretKey secretKey = keyGen.generateKey();
-            return Base64.getEncoder().encodeToString(secretKey.getEncoded());
-        } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException("Error while generating secret: ", e);
-        }
-    }
-
     public String generateToken(String subject) {
+        Map<String, Object> claims = new HashMap<>();
+//        claims.put("type", subject.contains("@") ? "email" : "username");
         return Jwts.builder()
-                .setClaims(new HashMap<>())
+                .setClaims(claims)
                 .setSubject(subject)
                 .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + expiration))
+                .setExpiration(new Date(System.currentTimeMillis()))
                 .signWith(getKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
 
-    public Key getKey() {
+    private Key getKey() {
         byte[] keyBytes = Decoders.BASE64.decode(secret);
         return Keys.hmacShaKeyFor(keyBytes);
     }
 
-    public boolean validateToken(String jwtToken, UserDetails userDetails) {
-        String username = extractUsername(jwtToken);
-        return (username.equals(userDetails.getUsername()) && !isTokenExpired(jwtToken));
+    private String generateSecret() {
+        try {
+            KeyGenerator keyGen = KeyGenerator.getInstance("HmacSHA256");
+            SecretKey key = keyGen.generateKey();
+            return Base64.getEncoder().encodeToString(key.getEncoded());
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException("No algorithm found");
+        }
     }
 
-    private boolean isTokenExpired(String jwtToken) {
-        return extractClaim(jwtToken, Claims::getExpiration).before(new Date());
+    public String extractSubject(String token) {
+        return extractClaim(token, Claims::getSubject);
     }
 
-    public String extractUsername(String jwtToken) {
-        return extractClaim(jwtToken, Claims::getSubject);
+    private String extractSubjectType(String token) {
+        Object type = extractAllClaims(token).get("type");
+        return type != null ? type.toString() : "unknown";
     }
 
-    public <T> T extractClaim(String token, Function<Claims, T> claimResolver) {
+    private <T> T extractClaim(String token, Function<Claims, T> claimResolver) {
         Claims claims = extractAllClaims(token);
         return claimResolver.apply(claims);
     }
@@ -78,5 +78,23 @@ public class JwtService {
                 .build()
                 .parseClaimsJws(token)
                 .getBody();
+    }
+
+    public boolean validateToken(String token, UserDetails userDetails) {
+        String subject = extractSubject(token);
+//        String type = extractSubjectType(token);
+//        boolean matches = false;
+//        if (type.equals("email")) {
+//            matches = subject.equals(((User) userDetails).getEmail());
+//        }else if(type.equals("username")) {
+//            matches=subject.equals(userDetails.getUsername());
+//        }
+//        return matches && !isTokenExpired(token);
+
+        return ((subject.equals(((User) userDetails).getEmail()) || subject.equals(userDetails.getUsername())) && !isTokenExpired(token));
+    }
+
+    private boolean isTokenExpired(String token) {
+        return extractClaim(token, Claims::getExpiration).before(new Date());
     }
 }

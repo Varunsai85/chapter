@@ -16,33 +16,33 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "users")
+@Table(name = "employees")
 public class User implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID userId;
+    private UUID employee_id;
+    @Column(nullable = false, unique = true)
+    private String username;
     @Column(nullable = false, unique = true)
     private String email;
     @Column(nullable = false)
     private String password;
-    @Column(nullable = false, unique = true)
-    private String username;
-    @Column(name = "verification_code")
+    @Column(nullable = false)
+    private boolean isEnabled;
     private String verificationCode;
-    @Column(name = "verification_expiration")
-    private LocalDateTime verificationCodeExpiresAt;
-    private boolean isVerified;
+    private LocalDateTime codeExpiresIn;
 
-    @ManyToMany(mappedBy = "users")
-    private List<Book> books;
+    public User(String username, String email, String password, boolean isEnabled, String verificationCode, LocalDateTime codeExpiresIn) {
+        this.username = username;
+        this.email = email;
+        this.password = password;
+        this.isEnabled = isEnabled;
+        this.verificationCode = verificationCode;
+        this.codeExpiresIn = codeExpiresIn;
+    }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of();
-    }
-
-    @Override
-    public boolean isEnabled() {
-        return this.isVerified;
     }
 }

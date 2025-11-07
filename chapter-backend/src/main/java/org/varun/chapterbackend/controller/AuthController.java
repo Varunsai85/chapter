@@ -1,35 +1,44 @@
 package org.varun.chapterbackend.controller;
 
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.varun.chapterbackend.model.dto.ApiResponse;
 import org.varun.chapterbackend.model.dto.SignInDto;
 import org.varun.chapterbackend.model.dto.SignUpDto;
-import org.varun.chapterbackend.model.dto.VerifyUserDto;
+import org.varun.chapterbackend.model.dto.VerifyCodeDto;
 import org.varun.chapterbackend.service.AuthService;
 
 @RestController
 @RequestMapping("auth")
 @AllArgsConstructor
 public class AuthController {
-    private AuthService service;
+    private AuthService authService;
 
     @PostMapping("signup")
-    public ResponseEntity<?> signUp(@RequestBody SignUpDto userDto) {
-        return service.signUp(userDto);
+    public ResponseEntity<?> signUp(@Valid @RequestBody SignUpDto input){
+        return authService.signUp(input);
     }
 
     @PostMapping("signin")
-    public ResponseEntity<?> signIn(@RequestBody SignInDto userDto) {
-        return service.signIn(userDto);
+    public ResponseEntity<?> signIn(@Valid @RequestBody SignInDto input){
+        return authService.signIn(input);
     }
 
     @PostMapping("verify")
-    public ResponseEntity<?> verifyUser(@RequestBody VerifyUserDto verifyUserDto) {
-        return service.verifyUser(verifyUserDto);
+    public ResponseEntity<?> verify(@Valid @RequestParam VerifyCodeDto input){
+        return authService.verifyUser(input);
     }
+
+    @GetMapping("check-username")
+    public ResponseEntity<ApiResponse<Boolean>> checkUsername(@RequestParam String username){
+        return authService.checkUserName(username);
+    }
+
+    @GetMapping("check-email")
+    public ResponseEntity<ApiResponse<Boolean>> checkEmail(@RequestParam String email){
+        return authService.checkEmail(email);
+    }
+
 }
