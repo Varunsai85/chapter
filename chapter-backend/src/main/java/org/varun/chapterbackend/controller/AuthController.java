@@ -27,7 +27,7 @@ public class AuthController {
     }
 
     @PostMapping("verify")
-    public ResponseEntity<?> verify(@Valid @RequestParam VerifyCodeDto input){
+    public ResponseEntity<?> verify(@Valid @RequestBody VerifyCodeDto input){
         return authService.verifyUser(input);
     }
 
